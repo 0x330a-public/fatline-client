@@ -9,6 +9,8 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.material3.ColorScheme
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -16,6 +18,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.tooling.preview.UiMode
 import androidx.compose.ui.unit.dp
+import online.mempool.fatline.client.ui.theme.FatlineTheme
 
 @Composable
 fun ProfileBanner(modifier: Modifier = Modifier) {
@@ -29,15 +32,21 @@ fun ProfileBanner(modifier: Modifier = Modifier) {
                 .size(48.dp, 48.dp)
                 .clip(CircleShape)
         ) {
-            Box(modifier = Modifier.background(Color.Cyan).fillMaxSize())
+
         }
     }
 
 }
 
 
-@Preview(showSystemUi = true)
+@Preview(
+    uiMode = Configuration.UI_MODE_NIGHT_YES or Configuration.UI_MODE_TYPE_NORMAL
+)
 @Composable
 fun PreviewProfile() {
-    ProfileBanner()
+    FatlineTheme {
+        Box(Modifier.fillMaxSize()) {
+            ProfileBanner()
+        }
+    }
 }
