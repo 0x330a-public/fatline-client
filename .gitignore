@@ -1,7 +1,6 @@
 *.iml
 .gradle
 /local.properties
-/.idea
 .DS_Store
 /build
 /captures
@@ -24,7 +23,6 @@ captures/
 output.json
 
 # IntelliJ
-*.iml
 .idea/
 misc.xml
 deploymentTargetDropDown.xml
