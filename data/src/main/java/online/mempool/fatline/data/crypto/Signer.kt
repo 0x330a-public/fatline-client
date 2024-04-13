@@ -4,7 +4,7 @@ import com.ionspin.kotlin.crypto.signature.Signature
 import online.mempool.fatline.data.DEFAULT_HASH_LENGTH
 
 @OptIn(ExperimentalUnsignedTypes::class)
-class Signer(privateKeyBytes: ByteArray) {
+class Signer(secretKeyBytes: ByteArray) {
 
     sealed class Failure(message: String): Throwable(message) {
         data object InvalidHashLength: Failure("Hash was not $DEFAULT_HASH_LENGTH unsigned bytes long") {
@@ -12,7 +12,8 @@ class Signer(privateKeyBytes: ByteArray) {
         }
     }
 
-    private val privateKey = privateKeyBytes.asUByteArray()
+    private val secretKey = secretKeyBytes.asUByteArray()
+    val publicKey = Signature.ed25519SkToPk(secretKey).asByteArray()
 
     /**
      * Sign a hash, assuming a hash length of the truncated Farcaster default (20 bytes)
@@ -21,7 +22,7 @@ class Signer(privateKeyBytes: ByteArray) {
     fun ByteArray.signed(): Result<ByteArray> {
         val asUnsigned = this.asUByteArray()
         if (asUnsigned.size != DEFAULT_HASH_LENGTH) return Result.failure(Failure.InvalidHashLength)
-        return Result.success(Signature.detached(asUnsigned, privateKey).asByteArray())
+        return Result.success(Signature.detached(asUnsigned, secretKey).asByteArray())
     }
 
 }

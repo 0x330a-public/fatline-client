@@ -1,8 +1,11 @@
 plugins {
-    kotlin("kapt") version libs.versions.kotlin
+    alias(libs.plugins.kapt)
+    alias(libs.plugins.serialization)
     alias(libs.plugins.androidApplication)
     alias(libs.plugins.jetbrainsKotlinAndroid)
+    alias(libs.plugins.parcelize)
     alias(libs.plugins.anvil)
+    alias(libs.plugins.ksp)
 }
 
 android {
@@ -32,11 +35,11 @@ android {
         }
     }
     compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_1_8
-        targetCompatibility = JavaVersion.VERSION_1_8
+        sourceCompatibility = JavaVersion.VERSION_11
+        targetCompatibility = JavaVersion.VERSION_11
     }
     kotlinOptions {
-        jvmTarget = "1.8"
+        jvmTarget = "11"
     }
     buildFeatures {
         compose = true
@@ -61,10 +64,12 @@ dependencies {
     implementation(libs.androidx.ui.tooling.preview)
     implementation(libs.androidx.material3)
     implementation(libs.slack.circuit.foundation)
+    api(libs.slack.circuit.codegen.annotations)
+    ksp(libs.slack.circuit.codegen)
     implementation(libs.retrofit)
-    implementation(libs.retrofit.converter.moshi)
+    implementation(libs.retrofit.converter.serialization)
+    implementation(libs.kotlinx.serialization.core)
     implementation(libs.okhttp)
-    implementation(libs.moshi)
     implementation(libs.blake3)
     implementation(project(":data"))
     implementation(libs.androidx.security.crypto.ktx)

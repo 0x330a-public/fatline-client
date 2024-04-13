@@ -34,7 +34,7 @@ fun MainContent() {
         // A surface container using the 'background' color from the theme
         Scaffold(
             topBar = {
-                TopAppBar(title = { Text("Howdy") })
+                TopAppBar(title = { Text("") })
             }
         ) { padding ->
             Surface(

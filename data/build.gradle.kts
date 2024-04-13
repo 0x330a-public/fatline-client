@@ -1,13 +1,13 @@
 plugins {
     id("java-library")
     alias(libs.plugins.jetbrainsKotlinJvm)
-    kotlin("kapt") version libs.versions.kotlin
+    alias(libs.plugins.kapt)
     alias(libs.plugins.anvil)
 }
 
 java {
-    sourceCompatibility = JavaVersion.VERSION_17
-    targetCompatibility = JavaVersion.VERSION_17
+    sourceCompatibility = JavaVersion.VERSION_11
+    targetCompatibility = JavaVersion.VERSION_11
 }
 
 dependencies {

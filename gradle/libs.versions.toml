@@ -6,6 +6,7 @@ coreKtx = "1.12.0"
 junit = "4.13.2"
 junitVersion = "1.1.5"
 espressoCore = "3.5.1"
+kotlinxSerialization = "1.6.3"
 lifecycleRuntimeKtx = "2.7.0"
 activityCompose = "1.8.2"
 composeBom = "2024.04.00"
@@ -15,8 +16,8 @@ dagger = "2.51"
 multiplatformCryptoLibsodiumBindings = "0.9.0"
 retrofit = "2.9.0"
 okhttp = "4.12.0"
-moshi = "1.15.0"
 appcompat = "1.6.1"
+serializationConverter = "2.11.0"
 material = "1.11.0"
 securityCrypto = "1.1.0-alpha06"
 
@@ -36,14 +37,16 @@ androidx-ui-test-manifest = { group = "androidx.compose.ui", name = "ui-test-man
 androidx-ui-test-junit4 = { group = "androidx.compose.ui", name = "ui-test-junit4" }
 androidx-material3 = { group = "androidx.compose.material3", name = "material3" }
 junit-jupiter = { module = "org.junit.jupiter:junit-jupiter", version.ref = "junitJupiter" }
+kotlinx-serialization-core = { module = "org.jetbrains.kotlinx:kotlinx-serialization-core", version.ref = "kotlinxSerialization" }
 multiplatform-crypto-libsodium-bindings = { module = "com.ionspin.kotlin:multiplatform-crypto-libsodium-bindings", version.ref = "multiplatformCryptoLibsodiumBindings" }
 slack-circuit-foundation = { group = "com.slack.circuit", name = "circuit-foundation", version.ref = "circuit" }
+slack-circuit-codegen-annotations = { group = "com.slack.circuit", name = "circuit-codegen-annotations", version.ref = "circuit" }
+slack-circuit-codegen = { group = "com.slack.circuit", name = "circuit-codegen", version.ref = "circuit" }
 dagger-impl = { group = "com.google.dagger", name = "dagger", version.ref = "dagger" }
 dagger-compiler = { group = "com.google.dagger", name = "dagger-compiler", version.ref = "dagger" }
 retrofit = { group = "com.squareup.retrofit2", name = "retrofit", version.ref = "retrofit" }
-retrofit-converter-moshi = { group = "com.squareup.retrofit2", name = "converter-moshi", version.ref = "retrofit" }
+retrofit-converter-serialization = { group = "com.squareup.retrofit2", name = "converter-kotlinx-serialization", version.ref = "serializationConverter" }
 okhttp = { group = "com.squareup.okhttp3", name = "okhttp", version.ref = "okhttp" }
-moshi = { group = "com.squareup.moshi", name = "moshi", version.ref = "moshi" }
 blake3 = { group = "io.lktk", name = "blake3jni", version = "0.2.2" }
 androidx-appcompat = { group = "androidx.appcompat", name = "appcompat", version.ref = "appcompat" }
 material = { group = "com.google.android.material", name = "material", version.ref = "material" }
@@ -55,3 +58,7 @@ jetbrainsKotlinAndroid = { id = "org.jetbrains.kotlin.android", version.ref = "k
 jetbrainsKotlinJvm = { id = "org.jetbrains.kotlin.jvm", version.ref = "kotlin" }
 anvil = { id = "com.squareup.anvil", version.ref = "anvil" }
 androidLibrary = { id = "com.android.library", version.ref = "agp" }
+kapt = { id = "org.jetbrains.kotlin.kapt", version.ref = "kotlin" }
+ksp = { id = "com.google.devtools.ksp", version = "1.9.22-1.0.16" }
+serialization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "kotlin" }
+parcelize = { id = "org.jetbrains.kotlin.plugin.parcelize", version.ref = "kotlin" }
