@@ -1,14 +1,22 @@
 package online.mempool.fatline.data.crypto
 
-import org.junit.jupiter.api.Assertions.*
+import org.junit.jupiter.api.AfterEach
+import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Test
 
 class SignerTest {
 
-    @org.junit.jupiter.api.BeforeEach
+    @BeforeEach
     fun setUp() {
     }
 
-    @org.junit.jupiter.api.AfterEach
+    @AfterEach
     fun tearDown() {
     }
+
+    @Test
+    fun `test something`() {
+
+    }
+
 }
