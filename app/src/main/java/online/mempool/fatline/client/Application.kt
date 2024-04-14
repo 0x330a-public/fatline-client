@@ -6,6 +6,7 @@ import androidx.core.content.edit
 import androidx.security.crypto.EncryptedSharedPreferences
 import androidx.security.crypto.MasterKey
 import kotlinx.coroutines.runBlocking
+import online.mempool.fatline.client.di.AppComponent
 import online.mempool.fatline.data.di.CryptoModule
 import online.mempool.fatline.client.di.DaggerAppComponent
 import online.mempool.fatline.data.crypto.SecretKeyProvider
@@ -17,10 +18,24 @@ import online.mempool.fatline.data.crypto.initializeSodium
  */
 class Application: Application() {
 
+    companion object {
+        private const val APP_COMPONENT = "Application_AppComponent"
+    }
+
     private val appComponent by lazy {
         DaggerAppComponent.builder()
             .cryptoModule(CryptoModule(getSecretKeyProvider()))
             .build()
+    }
+
+    override fun getSystemService(name: String): Any {
+        if (name == APP_COMPONENT) return appComponent
+        return super.getSystemService(name)
+    }
+
+    override fun getSystemServiceName(serviceClass: Class<*>): String? {
+        if (serviceClass == AppComponent::class.java) return APP_COMPONENT
+        return super.getSystemServiceName(serviceClass)
     }
 
     override fun onCreate() {

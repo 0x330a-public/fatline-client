@@ -1,3 +1,5 @@
 <resources>
     <string name="app_name">Fatline</string>
+    <string name="onboardingTitle">Say hello to your Fatline public key:</string>
+    <string name="copyDescription">Copy</string>
 </resources>

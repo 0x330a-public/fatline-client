@@ -13,6 +13,7 @@ import androidx.compose.runtime.SideEffect
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalView
+import androidx.compose.ui.unit.dp
 import androidx.core.view.WindowCompat
 
 private val LightColors = lightColorScheme(
@@ -82,7 +83,7 @@ private val DarkColors = darkColorScheme(
 
 @Composable
 fun FatlineTheme(
-    darkTheme: Boolean = true,
+    darkTheme: Boolean = isSystemInDarkTheme(),
     // Dynamic color is available on Android 12+
     dynamicColor: Boolean = true,
     content: @Composable () -> Unit
@@ -111,3 +112,9 @@ fun FatlineTheme(
         content = content
     )
 }
+
+val SML_SPACING = 8.dp
+val MED_SPACING = 16.dp
+val MED_PLUS_SPACING = 24.dp
+val LGE_SPACING = 32.dp
+val XL_SPACING = 64.dp

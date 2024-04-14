@@ -2,9 +2,12 @@ package online.mempool.fatline.client.ui.theme
 
 import androidx.compose.material3.Typography
 import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.sp
+import online.mempool.fatline.client.R
+
 
 // Set of Material typography styles to start with
 val Typography = Typography(
@@ -14,7 +17,7 @@ val Typography = Typography(
         fontSize = 16.sp,
         lineHeight = 24.sp,
         letterSpacing = 0.5.sp
-    )
+    ),
     /* Other default text styles to override
     titleLarge = TextStyle(
         fontFamily = FontFamily.Default,
@@ -31,4 +34,20 @@ val Typography = Typography(
         letterSpacing = 0.5.sp
     )
     */
+)
+
+private val CourierRegular = Font(R.font.courier_prime_regular, weight = FontWeight.Normal)
+private val CourierBold = Font(R.font.courier_prime_bold, weight = FontWeight.Bold)
+private val CourierItalic = Font(R.font.courier_prime_italic, weight = FontWeight.Normal)
+private val CourierBoldItalic = Font(R.font.courier_prime_bold_italic, weight = FontWeight.Bold)
+
+val MonospaceRegular = FontFamily(CourierRegular, CourierBold)
+val MonospaceItalic = FontFamily(CourierItalic, CourierBoldItalic)
+
+val MonospaceStyle = TextStyle(
+    fontFamily = MonospaceRegular
+)
+
+val MonospaceItalicStyle = TextStyle(
+    fontFamily = MonospaceItalic
 )
