@@ -1,3 +1,6 @@
+import org.gradle.initialization.Environment
+import java.util.Properties
+
 plugins {
     alias(libs.plugins.kapt)
     alias(libs.plugins.serialization)
@@ -6,6 +9,12 @@ plugins {
     alias(libs.plugins.parcelize)
     alias(libs.plugins.anvil)
     alias(libs.plugins.ksp)
+}
+
+val serverPropertiesFile = rootProject.file("server.properties")
+val serverProperties = Properties()
+if (serverPropertiesFile.exists()) {
+    serverProperties.load(serverPropertiesFile.inputStream())
 }
 
 android {
@@ -18,6 +27,10 @@ android {
         targetSdk = 34
         versionCode = 1
         versionName = "1.0"
+
+        val serverUrl = serverProperties.getProperty("SERVER_URL", null)
+
+        buildConfigField("String", "SERVER_URL", "\"$serverUrl\"")
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables {
@@ -43,6 +56,7 @@ android {
     }
     buildFeatures {
         compose = true
+        buildConfig = true
     }
     composeOptions {
         kotlinCompilerExtensionVersion = "1.5.10"
