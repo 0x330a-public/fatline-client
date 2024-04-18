@@ -49,7 +49,6 @@ retrofit-converter-serialization = { group = "com.squareup.retrofit2", name = "c
 okhttp = { group = "com.squareup.okhttp3", name = "okhttp", version.ref = "okhttp" }
 blake3 = { group = "io.lktk", name = "blake3jni", version = "0.2.2" }
 androidx-appcompat = { group = "androidx.appcompat", name = "appcompat", version.ref = "appcompat" }
-material = { group = "com.google.android.material", name = "material", version.ref = "material" }
 androidx-security-crypto-ktx = { group = "androidx.security", name = "security-crypto-ktx", version.ref = "securityCrypto" }
 
 [plugins]

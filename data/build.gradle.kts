@@ -15,4 +15,5 @@ dependencies {
     implementation(libs.multiplatform.crypto.libsodium.bindings)
     implementation(libs.dagger.impl)
     kapt(libs.dagger.compiler)
+    api(libs.okhttp)
 }

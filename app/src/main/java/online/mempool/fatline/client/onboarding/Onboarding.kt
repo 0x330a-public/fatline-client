@@ -16,7 +16,12 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
@@ -35,7 +40,12 @@ import com.slack.circuit.runtime.screen.Screen
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedFactory
 import dagger.assisted.AssistedInject
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.isActive
+import kotlinx.coroutines.launch
 import kotlinx.parcelize.Parcelize
+import online.mempool.fatline.api.UserRepository
 import online.mempool.fatline.client.R
 import online.mempool.fatline.client.ui.theme.LGE_SPACING
 import online.mempool.fatline.client.ui.theme.MED_PLUS_SPACING
@@ -44,13 +54,22 @@ import online.mempool.fatline.client.ui.theme.MonospaceRegular
 import online.mempool.fatline.client.ui.theme.XL_SPACING
 import online.mempool.fatline.data.crypto.Signer
 import online.mempool.fatline.data.di.AppScope
+import java.lang.Exception
+import java.util.Optional
+import kotlin.jvm.optionals.getOrElse
+
+sealed class RegistrationState {
+    data object NotRegistering: RegistrationState()
+    data object Registering: RegistrationState()
+    data class Error(val exception: Exception): RegistrationState()
+}
 
 @Parcelize
 data object OnboardingScreen: Screen {
     sealed interface Event: CircuitUiEvent {
         data object Copy: Event
     }
-    data class State(val publicKey: ByteArray, val eventSink: (Event) -> Unit): CircuitUiState {
+    data class State(val publicKey: ByteArray, val registrationState: RegistrationState, val eventSink: (Event) -> Unit): CircuitUiState {
         override fun equals(other: Any?): Boolean {
             if (this === other) return true
             if (javaClass != other?.javaClass) return false
@@ -68,13 +87,32 @@ data object OnboardingScreen: Screen {
 
 
 class OnboardingPresenter @AssistedInject constructor(@Assisted private val navigator: Navigator,
-                                                      private val signer: Signer): Presenter<OnboardingScreen.State> {
+                                                      private val userRepository: UserRepository): Presenter<OnboardingScreen.State> {
     @Composable
     override fun present(): OnboardingScreen.State {
-
         val context = LocalContext.current
 
-        return OnboardingScreen.State(signer.publicKey) { event ->
+        var checkedFid: Long? by remember { mutableStateOf(null) }
+
+        var registrationState by remember { mutableStateOf(RegistrationState.NotRegistering) }
+
+        val registeredFlow = LaunchedEffect(checkedFid) {
+            val fid = checkedFid ?: run {
+                if (registrationState != RegistrationState.NotRegistering) {
+                    registrationState = RegistrationState.NotRegistering
+                }
+                return@LaunchedEffect
+            }
+            while (isActive) {
+                if (userRepository.performRegistrationRequest(fid)) {
+                    // navigate to main and set state
+                    Toast.makeText(context, "Registered", Toast.LENGTH_LONG).show()
+                }
+                delay(5_000)
+            }
+        }
+
+        return OnboardingScreen.State(userRepository.publicKey, registrationState) { event ->
             when (event) {
                 OnboardingScreen.Event.Copy -> {
                     // handle when event for copy in an actual better way and don't just use context

@@ -1,10 +1,16 @@
 package online.mempool.fatline.data.crypto
 
 import com.ionspin.kotlin.crypto.signature.Signature
+import okhttp3.Request
 import online.mempool.fatline.data.DEFAULT_HASH_LENGTH
 
 @OptIn(ExperimentalUnsignedTypes::class)
 class Signer(secretKeyBytes: ByteArray) {
+
+    companion object {
+        // attach timestamp header, signature, message etc
+        fun Request.Builder.bindSigner(signer: Signer): Request.Builder = this
+    }
 
     sealed class Failure(message: String): Throwable(message) {
         data object InvalidHashLength: Failure("Hash was not $DEFAULT_HASH_LENGTH unsigned bytes long") {
@@ -24,5 +30,4 @@ class Signer(secretKeyBytes: ByteArray) {
         if (asUnsigned.size != DEFAULT_HASH_LENGTH) return Result.failure(Failure.InvalidHashLength)
         return Result.success(Signature.detached(asUnsigned, secretKey).asByteArray())
     }
-
 }
