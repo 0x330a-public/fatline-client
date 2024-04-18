@@ -18,14 +18,23 @@ interface OnboardingServer {
 
 const val SERVER_HTTP_URL = "Server_Named_HttpUrl"
 const val AUTH_INTERCEPTOR = "Auth_Interceptor"
+const val FID_INTERCEPTOR = "Fid_Interceptor"
+
+const val FID_HEADER = "fid"
+const val EXTRA_DATA_HEADER = "extra_sig_data"
 
 @ContributesBinding(AppScope::class, boundType = OnboardingServer::class)
-class FatlineServer @Inject constructor(@Named(SERVER_HTTP_URL) url: HttpUrl, @Named(AUTH_INTERCEPTOR) authenticationInterceptor: Interceptor):
+class FatlineServer @Inject constructor(
+    @Named(SERVER_HTTP_URL) url: HttpUrl,
+    @Named(AUTH_INTERCEPTOR) authenticationInterceptor: Interceptor,
+    @Named(FID_INTERCEPTOR) fidInterceptor: Interceptor,
+):
     OnboardingServer
     // other server impl here also
 {
 
     private val httpClient = OkHttpClient.Builder()
+        .addInterceptor(fidInterceptor)
         .addInterceptor(authenticationInterceptor)
         // other parameters
         .build()
