@@ -9,14 +9,13 @@ import kotlinx.coroutines.withContext
 import okhttp3.Interceptor
 import online.mempool.fatline.data.crypto.Signer
 import online.mempool.fatline.data.di.AppScope
-import retrofit2.Response
 import java.util.concurrent.atomic.AtomicReference
 import javax.inject.Named
 import javax.inject.Provider
 
 class UserRepository(
-    private val signer: Signer,
-    private val onboardingServerProvider: Provider<OnboardingServer>
+    signer: Signer,
+    private val onboardingServerProvider: Provider<OnboardingClientService>
 ) {
 
     private val onboardingServer by lazy {
@@ -36,9 +35,11 @@ class UserRepository(
      * (server returns 200 if there is an on-chain event registration or bad request / unauthorized / internal server error otherwise)
      */
     suspend fun performRegistrationRequest(fid: Long) = withContext(coroutineContext) {
-        onboardingServer.checkRegistration(signer.publicKey, fid)
+        onboardingServer.checkRegistration(fid)
             // on result probably store fid if success
-            .let(Response<Any>::isSuccessful)
+            .let {
+                false
+            }
     }
 }
 
@@ -46,7 +47,7 @@ class UserRepository(
 @ContributesTo(AppScope::class)
 class UserRepoModule {
     @Provides
-    fun provideUserRepository(signer: Signer, server: Provider<OnboardingServer>) = UserRepository(signer, server)
+    fun provideUserRepository(signer: Signer, server: Provider<OnboardingClientService>) = UserRepository(signer, server)
 
     @Provides
     @Named(FID_INTERCEPTOR)

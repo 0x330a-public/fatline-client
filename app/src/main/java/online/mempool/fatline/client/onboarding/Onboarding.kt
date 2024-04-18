@@ -9,18 +9,17 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.width
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -29,7 +28,6 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.unit.dp
 import androidx.compose.ui.util.fastJoinToString
 import com.slack.circuit.codegen.annotations.CircuitInject
 import com.slack.circuit.runtime.CircuitUiEvent
@@ -40,10 +38,8 @@ import com.slack.circuit.runtime.screen.Screen
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedFactory
 import dagger.assisted.AssistedInject
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.isActive
-import kotlinx.coroutines.launch
 import kotlinx.parcelize.Parcelize
 import online.mempool.fatline.api.UserRepository
 import online.mempool.fatline.client.R
@@ -52,22 +48,19 @@ import online.mempool.fatline.client.ui.theme.MED_PLUS_SPACING
 import online.mempool.fatline.client.ui.theme.MED_SPACING
 import online.mempool.fatline.client.ui.theme.MonospaceRegular
 import online.mempool.fatline.client.ui.theme.XL_SPACING
-import online.mempool.fatline.data.crypto.Signer
 import online.mempool.fatline.data.di.AppScope
-import java.lang.Exception
-import java.util.Optional
-import kotlin.jvm.optionals.getOrElse
 
-sealed class RegistrationState {
-    data object NotRegistering: RegistrationState()
-    data object Registering: RegistrationState()
-    data class Error(val exception: Exception): RegistrationState()
+sealed interface RegistrationState {
+    data object NotRegistering: RegistrationState
+    data object Registering: RegistrationState
+    data class Error(val exception: Exception): RegistrationState
 }
 
 @Parcelize
 data object OnboardingScreen: Screen {
     sealed interface Event: CircuitUiEvent {
         data object Copy: Event
+        data class UpdateFid(val fid: Long): Event
     }
     data class State(val publicKey: ByteArray, val registrationState: RegistrationState, val eventSink: (Event) -> Unit): CircuitUiState {
         override fun equals(other: Any?): Boolean {
@@ -96,7 +89,7 @@ class OnboardingPresenter @AssistedInject constructor(@Assisted private val navi
 
         var registrationState by remember { mutableStateOf(RegistrationState.NotRegistering) }
 
-        val registeredFlow = LaunchedEffect(checkedFid) {
+        LaunchedEffect(checkedFid) {
             val fid = checkedFid ?: run {
                 if (registrationState != RegistrationState.NotRegistering) {
                     registrationState = RegistrationState.NotRegistering
@@ -107,6 +100,8 @@ class OnboardingPresenter @AssistedInject constructor(@Assisted private val navi
                 if (userRepository.performRegistrationRequest(fid)) {
                     // navigate to main and set state
                     Toast.makeText(context, "Registered", Toast.LENGTH_LONG).show()
+                } else {
+                    Toast.makeText(context, "Not Registered yet...", Toast.LENGTH_LONG).show()
                 }
                 delay(5_000)
             }
@@ -118,6 +113,8 @@ class OnboardingPresenter @AssistedInject constructor(@Assisted private val navi
                     // handle when event for copy in an actual better way and don't just use context
                     Toast.makeText(context, "Copied the pubkey", Toast.LENGTH_LONG).show()
                 }
+
+                is OnboardingScreen.Event.UpdateFid -> checkedFid = event.fid
             }
         }
     }
@@ -134,6 +131,7 @@ class OnboardingPresenter @AssistedInject constructor(@Assisted private val navi
 fun Onboarding(state: OnboardingScreen.State, modifier: Modifier = Modifier) {
 
     val eventSink = state.eventSink
+    var checkFid by remember { mutableStateOf<Long?>(null) }
 
     Scaffold { padding ->
         Column(
@@ -165,6 +163,13 @@ fun Onboarding(state: OnboardingScreen.State, modifier: Modifier = Modifier) {
             IconButton(onClick = { eventSink(OnboardingScreen.Event.Copy) }) {
                 Icon(painter = painterResource(id = R.drawable.baseline_content_copy_24), contentDescription = stringResource(id = R.string.copyDescription))
             }
+
+            TextField(value = checkFid?.toString() ?: "", onValueChange = { value: String ->
+                value.toLongOrNull()?.let { fidValue ->
+                    checkFid = fidValue
+                    eventSink(OnboardingScreen.Event.UpdateFid(fidValue))
+                }
+            }, modifier = Modifier.fillMaxWidth(0.4f))
         }
     }
 }
