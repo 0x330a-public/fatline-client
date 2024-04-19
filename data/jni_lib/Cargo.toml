@@ -1,0 +1,23 @@
+[package]
+name = "jni_lib"
+version = "0.1.0"
+edition = "2021"
+
+[lib]
+# This must contain at least cdylib for Android libraries to be generated.
+crate-type = ["cdylib"]
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+blake3 = "1.5.1"
+jni = "0.21.1"
+
+# An example of a custom profile
+[profile.release-space-optimized]
+inherits = "release"
+strip = true  # Automatically strip symbols from the binary.
+opt-level = "z"  # Optimize for size.
+lto = true  # Enable link time optimization
+codegen-units = 1  # Reduce parallel code generation units
+panic = "abort"

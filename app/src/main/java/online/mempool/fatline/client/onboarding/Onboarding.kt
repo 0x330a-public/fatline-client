@@ -23,9 +23,11 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalClipboardManager
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.util.fastJoinToString
@@ -59,7 +61,7 @@ sealed interface RegistrationState {
 @Parcelize
 data object OnboardingScreen: Screen {
     sealed interface Event: CircuitUiEvent {
-        data object Copy: Event
+        data class Copy(val data: String): Event
         data class UpdateFid(val fid: Long): Event
     }
     data class State(val publicKey: ByteArray, val registrationState: RegistrationState, val eventSink: (Event) -> Unit): CircuitUiState {
@@ -107,10 +109,13 @@ class OnboardingPresenter @AssistedInject constructor(@Assisted private val navi
             }
         }
 
+        val clipboard = LocalClipboardManager.current
+
         return OnboardingScreen.State(userRepository.publicKey, registrationState) { event ->
             when (event) {
-                OnboardingScreen.Event.Copy -> {
+                is OnboardingScreen.Event.Copy -> {
                     // handle when event for copy in an actual better way and don't just use context
+                    clipboard.setText(AnnotatedString(event.data))
                     Toast.makeText(context, "Copied the pubkey", Toast.LENGTH_LONG).show()
                 }
 
@@ -160,7 +165,7 @@ fun Onboarding(state: OnboardingScreen.State, modifier: Modifier = Modifier) {
                 textAlign = TextAlign.Center,
                 style = MaterialTheme.typography.bodyLarge,
                 fontFamily = MonospaceRegular)
-            IconButton(onClick = { eventSink(OnboardingScreen.Event.Copy) }) {
+            IconButton(onClick = { eventSink(OnboardingScreen.Event.Copy(state.publicKey.toHexString())) }) {
                 Icon(painter = painterResource(id = R.drawable.baseline_content_copy_24), contentDescription = stringResource(id = R.string.copyDescription))
             }
 

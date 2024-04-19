@@ -14,11 +14,9 @@ anvil = "2.4.9"
 circuit = "0.20.0"
 dagger = "2.51"
 multiplatformCryptoLibsodiumBindings = "0.9.0"
-retrofit = "2.9.0"
+retrofit = "2.11.0"
 okhttp = "4.12.0"
 appcompat = "1.6.1"
-serializationConverter = "2.11.0"
-material = "1.11.0"
 securityCrypto = "1.1.0-alpha06"
 
 [libraries]
@@ -46,9 +44,8 @@ slack-circuit-codegen = { group = "com.slack.circuit", name = "circuit-codegen",
 dagger-impl = { group = "com.google.dagger", name = "dagger", version.ref = "dagger" }
 dagger-compiler = { group = "com.google.dagger", name = "dagger-compiler", version.ref = "dagger" }
 retrofit = { group = "com.squareup.retrofit2", name = "retrofit", version.ref = "retrofit" }
-retrofit-converter-serialization = { group = "com.squareup.retrofit2", name = "converter-kotlinx-serialization", version.ref = "serializationConverter" }
+retrofit-converter-serialization = { group = "com.squareup.retrofit2", name = "converter-kotlinx-serialization", version.ref = "retrofit" }
 okhttp = { group = "com.squareup.okhttp3", name = "okhttp", version.ref = "okhttp" }
-blake3 = { group = "io.lktk", name = "blake3jni", version = "0.2.2" }
 androidx-appcompat = { group = "androidx.appcompat", name = "appcompat", version.ref = "appcompat" }
 androidx-security-crypto-ktx = { group = "androidx.security", name = "security-crypto-ktx", version.ref = "securityCrypto" }
 

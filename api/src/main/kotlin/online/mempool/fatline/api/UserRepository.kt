@@ -9,7 +9,6 @@ import kotlinx.coroutines.withContext
 import okhttp3.Interceptor
 import online.mempool.fatline.data.crypto.Signer
 import online.mempool.fatline.data.di.AppScope
-import java.util.concurrent.atomic.AtomicReference
 import javax.inject.Named
 import javax.inject.Provider
 
@@ -25,8 +24,7 @@ class UserRepository(
     private val coroutineContext = Dispatchers.IO + SupervisorJob()
 
     val publicKey = signer.publicKey
-
-    val pendingFid: AtomicReference<String?> = AtomicReference()
+    var fid: Long? = null
 
     // maybe move this in future
     /**
@@ -37,8 +35,13 @@ class UserRepository(
     suspend fun performRegistrationRequest(fid: Long) = withContext(coroutineContext) {
         onboardingServer.checkRegistration(fid)
             // on result probably store fid if success
-            .let {
-                false
+            .let { response ->
+                if (response.isSuccessful) {
+                    // do actual store of user here
+                    this@UserRepository.fid = fid
+                    // fixme
+                    true
+                } else false
             }
     }
 }
@@ -53,11 +56,12 @@ class UserRepoModule {
     @Named(FID_INTERCEPTOR)
     fun provideFidInterceptor(userRepository: UserRepository) = Interceptor { chain ->
         // add confirmed or pending fid?
-        val pending = userRepository.pendingFid.get()
+        val fid = userRepository.fid
+        val hasHeader = !chain.request().header(FID_HEADER).isNullOrEmpty()
         val newReq = chain.request().newBuilder()
         // do our actual saved fid
-        if (!pending.isNullOrEmpty()) {
-            newReq.header(FID_HEADER, pending.toString())
+        if (fid != null && !hasHeader) {
+            newReq.header(FID_HEADER, fid.toString())
         }
         chain.proceed(newReq.build())
     }

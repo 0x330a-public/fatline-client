@@ -5,7 +5,7 @@ package online.mempool.fatline.data.crypto
 import com.ionspin.kotlin.crypto.signature.Signature
 import okhttp3.Request
 import online.mempool.fatline.data.DEFAULT_HASH_LENGTH
-import online.mempool.fatline.data.hash
+import online.mempool.fatline.data.Hash
 
 @OptIn(ExperimentalUnsignedTypes::class)
 class Signer(secretKeyBytes: ByteArray) {
@@ -23,7 +23,7 @@ class Signer(secretKeyBytes: ByteArray) {
             // wip implementation: H(pub_key (not hex) || timestamp || [optional: extra_sig_data]) -> should match sig for pub key
             val pubKey = signer.publicKey
             val pubKeyHex = pubKey.toHexString()
-            header("pub_hex", pubKeyHex)
+            header("key_hex", pubKeyHex)
             val timestamp = System.currentTimeMillis().toString()
             header("timestamp", timestamp)
             val extraDataEncoded = extraData?.encodeToByteArray() ?: byteArrayOf()
@@ -31,7 +31,8 @@ class Signer(secretKeyBytes: ByteArray) {
                 header("extra_sig_data_hex", extraDataEncoded.toHexString())
             }
 
-            val sigData = (pubKey + timestamp.encodeToByteArray() + extraDataEncoded).hash()
+            val sigData = Hash.hash(pubKey + timestamp.encodeToByteArray() + extraDataEncoded)
+
             // we should probably explode here if we don't successfully sign the data
             header("sig", signer.signed(sigData).getOrNull()!!.toHexString())
 

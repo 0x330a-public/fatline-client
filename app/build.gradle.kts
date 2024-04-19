@@ -1,4 +1,3 @@
-import org.gradle.initialization.Environment
 import java.util.Properties
 
 plugins {
@@ -81,7 +80,6 @@ dependencies {
     api(libs.okhttp)
     api(libs.slack.circuit.codegen.annotations)
     ksp(libs.slack.circuit.codegen)
-    implementation(libs.blake3)
     implementation(project(":api"))
     implementation(project(":data"))
     implementation(libs.androidx.security.crypto.ktx)
