@@ -36,12 +36,9 @@ class UserRepository(
         onboardingServer.checkRegistration(fid)
             // on result probably store fid if success
             .let { response ->
-                if (response.isSuccessful) {
-                    // do actual store of user here
-                    this@UserRepository.fid = fid
-                    // fixme
-                    true
-                } else false
+                response.isSuccessful.also { success ->
+                    if (success) this@UserRepository.fid = fid
+                }
             }
     }
 }
