@@ -1,9 +1,13 @@
 package online.mempool.fatline.data
 
+import androidx.room.Entity
+import androidx.room.PrimaryKey
 import kotlinx.serialization.Serializable
 
 @Serializable
+@Entity
 data class Profile(
+    @PrimaryKey
     val fid: Long,
     val username: String?,
     val display_name: String?,

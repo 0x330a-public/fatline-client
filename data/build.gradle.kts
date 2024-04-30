@@ -4,6 +4,7 @@ plugins {
     alias(libs.plugins.kapt)
     alias(libs.plugins.anvil)
     alias(libs.plugins.serialization)
+    alias(libs.plugins.ksp)
 }
 
 android {
@@ -39,6 +40,8 @@ dependencies {
     implementation(libs.multiplatform.crypto.libsodium.bindings)
     implementation(libs.dagger.impl)
     implementation(libs.kotlinx.serialization.core)
+    api(libs.room.runtime)
+    ksp(libs.room.compiler)
     kapt(libs.dagger.compiler)
     api(libs.okhttp)
 }

@@ -8,13 +8,15 @@ import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.withContext
 import okhttp3.Interceptor
 import online.mempool.fatline.data.crypto.Signer
+import online.mempool.fatline.data.db.ProfileStorage
 import online.mempool.fatline.data.di.AppScope
 import javax.inject.Named
 import javax.inject.Provider
 
 class UserRepository(
     signer: Signer,
-    private val onboardingServerProvider: Provider<OnboardingClientService>
+    private val onboardingServerProvider: Provider<OnboardingClientService>,
+    private val profileStorage: ProfileStorage
 ) {
 
     private val onboardingServer by lazy {
@@ -25,6 +27,8 @@ class UserRepository(
 
     val publicKey = signer.publicKey
     var fid: Long? = null
+        get() = 0
+        set(value) { field = value }
 
     // maybe move this in future
     /**
