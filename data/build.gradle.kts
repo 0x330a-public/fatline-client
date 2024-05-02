@@ -40,7 +40,7 @@ dependencies {
     implementation(libs.multiplatform.crypto.libsodium.bindings)
     implementation(libs.dagger.impl)
     implementation(libs.kotlinx.serialization.core)
-    api(libs.room.runtime)
+    implementation(libs.room.runtime)
     ksp(libs.room.compiler)
     kapt(libs.dagger.compiler)
     api(libs.okhttp)

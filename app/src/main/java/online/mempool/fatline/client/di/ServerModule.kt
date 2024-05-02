@@ -32,7 +32,7 @@ class ServerModule {
         // maybe do something with this?
         val fidString = prevRequest.header(FID_HEADER)!!
         val newRequest = chain.request().newBuilder()
-            .bindSigner(signer, extraData)
+            .bindSigner(signer, fidString.toUInt(), extraData)
         chain.proceed(newRequest.build())
     }
 

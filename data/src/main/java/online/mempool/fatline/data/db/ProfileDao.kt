@@ -7,7 +7,7 @@ import androidx.room.Update
 import online.mempool.fatline.data.Profile
 
 @Dao
-interface ProfileStorage {
+interface ProfileDao {
 
     @Query("SELECT * FROM profile")
     fun getAll(): List<Profile>

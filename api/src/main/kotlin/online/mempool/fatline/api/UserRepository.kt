@@ -8,15 +8,17 @@ import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.withContext
 import okhttp3.Interceptor
 import online.mempool.fatline.data.crypto.Signer
-import online.mempool.fatline.data.db.ProfileStorage
+import online.mempool.fatline.data.db.ProfileDao
+import online.mempool.fatline.data.db.UserPreferencesRepository
 import online.mempool.fatline.data.di.AppScope
 import javax.inject.Named
 import javax.inject.Provider
 
 class UserRepository(
-    signer: Signer,
+    private val signer: Signer,
     private val onboardingServerProvider: Provider<OnboardingClientService>,
-    private val profileStorage: ProfileStorage
+    private val profileDao: ProfileDao,
+    private val userPrefsRepository: UserPreferencesRepository,
 ) {
 
     private val onboardingServer by lazy {
@@ -25,10 +27,16 @@ class UserRepository(
 
     private val coroutineContext = Dispatchers.IO + SupervisorJob()
 
-    val publicKey = signer.publicKey
-    var fid: Long? = null
-        get() = 0
-        set(value) { field = value }
+    var selectedFid: Long? = userPrefsRepository.currentFid()
+        get() = userPrefsRepository.currentFid()
+        set(value) {
+            if (value != null) {
+                userPrefsRepository.setCurrentFid(value)
+            }
+            field = value
+        }
+
+    fun publicKeyFor(fid: UInt) = signer.publicKey(fid)
 
     // maybe move this in future
     /**
@@ -41,7 +49,7 @@ class UserRepository(
             // on result probably store fid if success
             .let { response ->
                 response.isSuccessful.also { success ->
-                    if (success) this@UserRepository.fid = fid
+                    if (success) this@UserRepository.selectedFid = fid
                 }
             }
     }
@@ -51,13 +59,17 @@ class UserRepository(
 @ContributesTo(AppScope::class)
 class UserRepoModule {
     @Provides
-    fun provideUserRepository(signer: Signer, server: Provider<OnboardingClientService>) = UserRepository(signer, server)
+    fun provideUserRepository(signer: Signer,
+                              server: Provider<OnboardingClientService>,
+                              profileDao: ProfileDao,
+                              userPrefs: UserPreferencesRepository,
+                              ) = UserRepository(signer, server, profileDao, userPrefs)
 
     @Provides
     @Named(FID_INTERCEPTOR)
     fun provideFidInterceptor(userRepository: UserRepository) = Interceptor { chain ->
         // add confirmed or pending fid?
-        val fid = userRepository.fid
+        val fid = userRepository.selectedFid
         val hasHeader = !chain.request().header(FID_HEADER).isNullOrEmpty()
         val newReq = chain.request().newBuilder()
         // do our actual saved fid

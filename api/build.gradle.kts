@@ -45,7 +45,7 @@ dependencies {
     implementation(libs.kotlinx.serialization.json)
     implementation(libs.dagger.impl)
     kapt(libs.dagger.compiler)
-    api(project(":data"))
+    implementation(project(":data"))
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)

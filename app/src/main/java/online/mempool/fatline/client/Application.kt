@@ -10,7 +10,7 @@ import online.mempool.fatline.client.di.AppComponent
 import online.mempool.fatline.data.di.CryptoModule
 import online.mempool.fatline.client.di.DaggerAppComponent
 import online.mempool.fatline.data.crypto.SecretKeyProvider
-import online.mempool.fatline.data.crypto.generateSigningKey
+import online.mempool.fatline.data.crypto.generateMasterKey
 import online.mempool.fatline.data.crypto.initializeSodium
 
 /**
@@ -52,7 +52,7 @@ class Application: Application() {
 class AndroidSecretKeyProvider(context: Context): SecretKeyProvider {
     companion object {
         private const val KEY_ALIAS = "fatline_key"
-        private const val SIGNING_KEY = "signing_key"
+        private const val MASTER_KEY = "master_key"
     }
 
     private val masterKey = MasterKey.Builder(context, KEY_ALIAS)
@@ -69,14 +69,14 @@ class AndroidSecretKeyProvider(context: Context): SecretKeyProvider {
     )
 
     @OptIn(ExperimentalStdlibApi::class)
-    override fun getSecretKey(): ByteArray {
-        if (!prefs.contains(SIGNING_KEY)) {
+    override fun getMasterKey(): ByteArray {
+        if (!prefs.contains(MASTER_KEY)) {
             prefs.edit {
-                val key = generateSigningKey()
-                putString(SIGNING_KEY, key.toHexString())
+                val key = generateMasterKey()
+                putString(MASTER_KEY, key.toHexString())
             }
         }
-        val encoded = prefs.getString(SIGNING_KEY, null)!!
+        val encoded = prefs.getString(MASTER_KEY, null)!!
         return encoded.hexToByteArray()
     }
 

@@ -64,7 +64,7 @@ data object OnboardingScreen: Screen {
         data class Copy(val data: String): Event
         data class UpdateFid(val fid: Long): Event
     }
-    data class State(val publicKey: ByteArray, val registrationState: RegistrationState, val eventSink: (Event) -> Unit): CircuitUiState {
+    data class State(val publicKey: ByteArray?, val registrationState: RegistrationState, val eventSink: (Event) -> Unit): CircuitUiState {
         override fun equals(other: Any?): Boolean {
             if (this === other) return true
             if (javaClass != other?.javaClass) return false
@@ -111,7 +111,7 @@ class OnboardingPresenter @AssistedInject constructor(@Assisted private val navi
 
         val clipboard = LocalClipboardManager.current
 
-        return OnboardingScreen.State(userRepository.publicKey, registrationState) { event ->
+        return OnboardingScreen.State(checkedFid?.toUInt()?.let(userRepository::publicKeyFor), registrationState) { event ->
             when (event) {
                 is OnboardingScreen.Event.Copy -> {
                     // handle when event for copy in an actual better way and don't just use context
@@ -156,17 +156,20 @@ fun Onboarding(state: OnboardingScreen.State, modifier: Modifier = Modifier) {
                     bottom = MED_SPACING
                 )
             )
-            Text(
-                state.publicKey.toHexString().chunked(4).chunked(4)
-                    .fastJoinToString("\n") { chunk -> chunk.fastJoinToString(" ") },
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = XL_SPACING, vertical = MED_SPACING),
-                textAlign = TextAlign.Center,
-                style = MaterialTheme.typography.bodyLarge,
-                fontFamily = MonospaceRegular)
-            IconButton(onClick = { eventSink(OnboardingScreen.Event.Copy(state.publicKey.toHexString())) }) {
-                Icon(painter = painterResource(id = R.drawable.baseline_content_copy_24), contentDescription = stringResource(id = R.string.copyDescription))
+
+            if (state.publicKey != null) {
+                Text(
+                    state.publicKey.toHexString().chunked(4).chunked(4)
+                        .fastJoinToString("\n") { chunk -> chunk.fastJoinToString(" ") },
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = XL_SPACING, vertical = MED_SPACING),
+                    textAlign = TextAlign.Center,
+                    style = MaterialTheme.typography.bodyLarge,
+                    fontFamily = MonospaceRegular)
+                IconButton(onClick = { eventSink(OnboardingScreen.Event.Copy(state.publicKey.toHexString())) }) {
+                    Icon(painter = painterResource(id = R.drawable.baseline_content_copy_24), contentDescription = stringResource(id = R.string.copyDescription))
+                }
             }
 
             TextField(value = checkFid?.toString() ?: "", onValueChange = { value: String ->

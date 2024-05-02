@@ -12,6 +12,6 @@ class CryptoModule(private val secretKeyProvider: SecretKeyProvider) {
 
     @Provides
     fun provideSigner() =
-        Signer(secretKeyProvider.getSecretKey())
+        Signer(secretKeyProvider.getMasterKey())
 
 }
