@@ -50,6 +50,9 @@ class UserRepository(
             .let { response ->
                 response.isSuccessful.also { success ->
                     if (success) this@UserRepository.selectedFid = fid
+                    response.body()?.let { returnedProfile ->
+                        profileDao.insert(returnedProfile)
+                    }
                 }
             }
     }
