@@ -1,5 +1,14 @@
 <resources>
-    <string name="app_name">Fatline</string>
-    <string name="onboardingTitle">Say hello to your Fatline public key:</string>
-    <string name="copyDescription">Copy</string>
+    <string name="app_name">fatline</string>
+    <string name="onboarding_title">Say hello to your Fatline public key:</string>
+    <string name="copy_description">Copy</string>
+    <string name="default_username">User</string>
+    <string name="loading_placeholder">Loading…</string>
+    <string name="profile_title">Profile</string>
+    <string name="waiting_for_registration">Waiting for registration event…</string>
+    <string name="edit_profile">Edit Profile</string>
+    <string name="following_placeholder">following</string>
+    <string name="following_number">%d following</string>
+    <string name="followers_placeholder">followers</string>
+    <string name="followers_number">%d followers</string>
 </resources>

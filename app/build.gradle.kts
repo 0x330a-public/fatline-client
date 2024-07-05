@@ -8,6 +8,7 @@ plugins {
     alias(libs.plugins.parcelize)
     alias(libs.plugins.anvil)
     alias(libs.plugins.ksp)
+    alias(libs.plugins.googleServices)
 }
 
 val serverPropertiesFile = rootProject.file("server.properties")
@@ -72,10 +73,13 @@ dependencies {
     implementation(libs.androidx.lifecycle.runtime.ktx)
     implementation(libs.androidx.activity.compose)
     implementation(platform(libs.androidx.compose.bom))
+    implementation(platform(libs.fcm.bom))
+    implementation(platform(libs.coil.bom))
     implementation(libs.androidx.ui)
     implementation(libs.androidx.ui.graphics)
     implementation(libs.androidx.ui.tooling.preview)
     implementation(libs.androidx.material3)
+    implementation(libs.coil.compose)
     implementation(libs.slack.circuit.foundation)
     api(libs.okhttp)
     api(libs.slack.circuit.codegen.annotations)

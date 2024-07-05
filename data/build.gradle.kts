@@ -1,3 +1,7 @@
+import com.google.protobuf.gradle.id
+import com.google.protobuf.gradle.proto
+import org.jetbrains.kotlin.gradle.plugin.extraProperties
+
 plugins {
     alias(libs.plugins.androidLibrary)
     alias(libs.plugins.jetbrainsKotlinAndroid)
@@ -5,6 +9,7 @@ plugins {
     alias(libs.plugins.anvil)
     alias(libs.plugins.serialization)
     alias(libs.plugins.ksp)
+    alias(libs.plugins.protobuf)
 }
 
 android {
@@ -27,6 +32,11 @@ android {
             )
         }
     }
+
+    sourceSets["main"].proto {
+        srcDirs("lib/protobufs/schemas")
+    }
+
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_17
         targetCompatibility = JavaVersion.VERSION_17
@@ -36,11 +46,32 @@ android {
     }
 }
 
+protobuf {
+    protoc {
+        artifact = "com.google.protobuf:protoc:4.27.2"
+    }
+
+    generateProtoTasks {
+        all().configureEach {
+            builtins {
+                id("java") {
+                    option("lite")
+                }
+                id("kotlin") {
+                    option("lite")
+                }
+            }
+        }
+    }
+}
+
 dependencies {
     implementation(libs.multiplatform.crypto.libsodium.bindings)
     implementation(libs.dagger.impl)
     implementation(libs.kotlinx.serialization.core)
     implementation(libs.room.runtime)
+    implementation(libs.room.ktx)
+    api(libs.protobuf.kotlin)
     ksp(libs.room.compiler)
     kapt(libs.dagger.compiler)
     api(libs.okhttp)

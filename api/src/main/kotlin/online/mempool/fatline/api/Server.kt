@@ -14,40 +14,45 @@ import retrofit2.Retrofit
 import retrofit2.converter.kotlinx.serialization.asConverterFactory
 import retrofit2.http.GET
 import retrofit2.http.Header
+import retrofit2.http.Path
 import java.util.concurrent.TimeUnit
 import javax.inject.Inject
 import javax.inject.Named
+
+
+interface FatlineClientService: OnboardingClientService, ProfileClientService
 
 interface OnboardingClientService {
     // Checks the me profile with the stored fid header
     @GET("/profile/me") suspend fun getProfile(): Response<Profile>
     // Checks the registration with temporary fid header, uses profile endpoint for convenience / quick load?
-    @GET("/profile/me") suspend fun checkRegistration(@Header("fid") fid: Long): Response<Profile>
+    @GET("/profile/me") suspend fun checkRegistration(): Response<Profile>
+}
+
+interface ProfileClientService {
+    /** Get a specific user's profile */
+    @GET("/profile/{fid}") suspend fun getProfile(@Path("fid") fid: Long): Profile?
+    /** Get a specific user's list of follows aka people that user {fid} is FOLLOWED BY */
+    @GET("/profile/{fid}/follows") suspend fun getFollows(@Path("fid") fid: Long): List<Profile>?
+    /** Get a specific user's list of following aka people that user {fid} is FOLLOWING */
+    @GET("/profile/{fid}/following") suspend fun getFollowing(@Path("fid") fid: Long): List<Profile>?
 }
 
 const val SERVER_HTTP_URL = "Server_Named_HttpUrl"
 const val AUTH_INTERCEPTOR = "Auth_Interceptor"
-const val FID_INTERCEPTOR = "Fid_Interceptor"
 
-const val FID_HEADER = "fid"
 const val EXTRA_DATA_HEADER = "extra_sig_data"
 
-@ContributesBinding(AppScope::class, boundType = OnboardingClientService::class)
+@ContributesBinding(AppScope::class, boundType = FatlineClientService::class)
 class FatlineClient @Inject constructor(
     @Named(SERVER_HTTP_URL) url: HttpUrl,
     @Named(AUTH_INTERCEPTOR) authenticationInterceptor: Interceptor,
-    @Named(FID_INTERCEPTOR) fidInterceptor: Interceptor,
-):
-    // TODO: interface by delegation
-    OnboardingClientService
-    // other server impl here also
-{
+): FatlineClientService {
 
     private val httpClient = OkHttpClient.Builder()
         .callTimeout(30, TimeUnit.SECONDS)
         .connectTimeout(30, TimeUnit.SECONDS)
         .readTimeout(30, TimeUnit.SECONDS)
-        .addInterceptor(fidInterceptor)
         .addInterceptor(authenticationInterceptor)
         // other parameters
         .build()
@@ -60,8 +65,12 @@ class FatlineClient @Inject constructor(
         .build()
 
     private val onboardFactory = retrofit.create(OnboardingClientService::class.java)
+    private val profileFactory = retrofit.create(ProfileClientService::class.java)
 
     override suspend fun getProfile(): Response<Profile> = onboardFactory.getProfile()
-    override suspend fun checkRegistration(fid: Long): Response<Profile> = onboardFactory.checkRegistration(fid)
+    override suspend fun checkRegistration(): Response<Profile> = onboardFactory.checkRegistration()
 
+    override suspend fun getProfile(fid: Long): Profile? = profileFactory.getProfile(fid)
+    override suspend fun getFollows(fid: Long): List<Profile>? = profileFactory.getFollows(fid)
+    override suspend fun getFollowing(fid: Long): List<Profile>? = profileFactory.getFollowing(fid)
 }

@@ -16,12 +16,12 @@ class Signer(secretKeyBytes: ByteArray) {
          * Adds authentication headers to the request:
          *
          */
-        fun Request.Builder.bindSigner(signer: Signer, fid: UInt, extraData: String?): Request.Builder {
+        fun Request.Builder.bindSigner(signer: Signer, keyIndex: UInt, extraData: String?): Request.Builder {
             // constants for headers
             // required headers: pub_hex, timestamp, sig, fid
             // optional header: extra_sig_data, maybe use this as route specific signature verification instead of overall?
             // wip implementation: H(pub_key (not hex) || timestamp || [optional: extra_sig_data]) -> should match sig for pub key
-            val pubKey = signer.publicKey(fid)
+            val pubKey = signer.publicKey(keyIndex)
             val pubKeyHex = pubKey.toHexString()
             header("key_hex", pubKeyHex)
             val timestamp = System.currentTimeMillis().toString()
@@ -34,7 +34,7 @@ class Signer(secretKeyBytes: ByteArray) {
             val sigData = Hash.hash(pubKey + timestamp.encodeToByteArray() + extraDataEncoded)
 
             // we should probably explode here if we don't successfully sign the data
-            header("sig", signer.signed(fid, sigData).getOrNull()!!.toHexString())
+            header("sig", signer.signed(keyIndex, sigData).getOrNull()!!.toHexString())
 
             return this
         }
@@ -49,17 +49,15 @@ class Signer(secretKeyBytes: ByteArray) {
     private val masterKey = secretKeyBytes.asUByteArray()
 
     /**
-     * @param forFid the fid to generate a deterministic key for
-     * @param generation unused currently, maybe allow for future generations for fid-specific key rotation?
-     * in future maybe cache this temporarily for a specific fid to save regenerating every signing request
+     * @param keyIndex the key index to generate a deterministic key for
      */
-    private fun derived(forFid: UInt, generation: Long = 0): UByteArray {
+    private fun derived(keyIndex: UInt): UByteArray {
         // TODO: maybe use generation hashed with kdf context or sth
-        return masterKey.deriveFidKey(forFid, generation)
+        return masterKey.deriveFidKey(keyIndex)
     }
 
-    fun publicKey(fid: UInt): ByteArray {
-        val derived = derived(fid)
+    fun publicKey(keyIndex: UInt): ByteArray {
+        val derived = derived(keyIndex)
         return Signature.ed25519SkToPk(derived).toByteArray()
     }
 
@@ -67,9 +65,9 @@ class Signer(secretKeyBytes: ByteArray) {
      * Sign a hash, assuming a hash length of the truncated Farcaster default (20 bytes)
      * @return Result of successful sign or failure if the byte array was not the expected length
      */
-    fun signed(fid: UInt, bytes: ByteArray): Result<ByteArray> {
+    fun signed(keyIndex: UInt, bytes: ByteArray): Result<ByteArray> {
         val asUnsigned = bytes.asUByteArray()
         if (asUnsigned.size != DEFAULT_HASH_LENGTH) return Result.failure(Failure.InvalidHashLength)
-        return Result.success(Signature.detached(asUnsigned, derived(fid)).toByteArray())
+        return Result.success(Signature.detached(asUnsigned, derived(keyIndex)).toByteArray())
     }
 }

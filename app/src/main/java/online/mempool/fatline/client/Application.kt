@@ -2,6 +2,7 @@ package online.mempool.fatline.client
 
 import android.app.Application
 import android.content.Context
+import android.content.SharedPreferences
 import androidx.core.content.edit
 import androidx.security.crypto.EncryptedSharedPreferences
 import androidx.security.crypto.MasterKey
@@ -9,9 +10,12 @@ import kotlinx.coroutines.runBlocking
 import online.mempool.fatline.client.di.AppComponent
 import online.mempool.fatline.data.di.CryptoModule
 import online.mempool.fatline.client.di.DaggerAppComponent
+import online.mempool.fatline.client.di.PrefsModule
 import online.mempool.fatline.data.crypto.SecretKeyProvider
 import online.mempool.fatline.data.crypto.generateMasterKey
 import online.mempool.fatline.data.crypto.initializeSodium
+import online.mempool.fatline.data.db.DaoModule
+import online.mempool.fatline.data.db.UserPreferencesRepository
 
 /**
  * Our base application, to provide dependency injection and setup
@@ -24,7 +28,9 @@ class Application: Application() {
 
     private val appComponent by lazy {
         DaggerAppComponent.builder()
+            .daoModule(DaoModule(this))
             .cryptoModule(CryptoModule(getSecretKeyProvider()))
+            .prefsModule(PrefsModule(AndroidUserPreferencesRepository(this)))
             .build()
     }
 
@@ -47,6 +53,23 @@ class Application: Application() {
 
     private fun getSecretKeyProvider(): SecretKeyProvider = AndroidSecretKeyProvider(this)
 
+}
+
+class AndroidUserPreferencesRepository(context: Context): UserPreferencesRepository {
+
+    companion object {
+        private const val KEY_INDEX = "KeyIndex"
+    }
+
+    private val prefs = context.getSharedPreferences("UserPreferences", Context.MODE_PRIVATE)
+
+    override fun currentKeyIndex(): Long = prefs.getLong(KEY_INDEX, 0)
+
+    override fun activateKey(index: Long) {
+        prefs.edit {
+            putLong(KEY_INDEX, index)
+        }
+    }
 }
 
 class AndroidSecretKeyProvider(context: Context): SecretKeyProvider {

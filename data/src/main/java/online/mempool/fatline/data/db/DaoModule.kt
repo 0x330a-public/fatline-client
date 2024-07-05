@@ -21,4 +21,7 @@ class DaoModule(private val context: Context) {
     @Provides
     fun provideProfileStorage(appDatabase: AppDatabase) = appDatabase.profileDao()
 
+    @Provides
+    fun provideSignerStorage(appDatabase: AppDatabase) = appDatabase.signerDao()
+
 }

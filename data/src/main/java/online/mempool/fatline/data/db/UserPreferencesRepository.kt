@@ -1,6 +1,6 @@
 package online.mempool.fatline.data.db
 
 interface UserPreferencesRepository {
-    fun currentFid(): Long?
-    fun setCurrentFid(fid: Long)
+    fun currentKeyIndex(): Long
+    fun activateKey(index: Long)
 }
