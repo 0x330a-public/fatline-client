@@ -11,4 +11,10 @@
     <string name="following_number">%d following</string>
     <string name="followers_placeholder">followers</string>
     <string name="followers_number">%d followers</string>
+    <string name="username_field">Username</string>
+    <string name="displayname_field">Display Name</string>
+    <string name="bio_field">Bio</string>
+    <string name="url_field">URL</string>
+    <string name="save_profile">Save Profile</string>
+    <string name="fid_field">fid: %d</string>
 </resources>

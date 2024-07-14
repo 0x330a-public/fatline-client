@@ -7,6 +7,7 @@ import com.slack.circuit.backstack.rememberSaveableBackStack
 import com.slack.circuit.foundation.Circuit
 import com.slack.circuit.foundation.CircuitCompositionLocals
 import com.slack.circuit.foundation.NavigableCircuitContent
+import com.slack.circuit.foundation.NavigatorDefaults
 import com.slack.circuit.foundation.rememberCircuitNavigator
 import online.mempool.fatline.client.di.AppComponent
 import online.mempool.fatline.client.screens.OnboardingScreen
@@ -22,6 +23,7 @@ class MainActivity : ComponentActivity() {
 
     private val circuit by lazy {
         Circuit.Builder()
+            .setDefaultNavDecoration(NavigatorDefaults.EmptyDecoration)
             .addPresenterFactories(appComponent.presenterFactories())
             .addUiFactories(appComponent.uiFactories())
             .build()

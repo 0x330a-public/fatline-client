@@ -1,6 +1,5 @@
 import com.google.protobuf.gradle.id
 import com.google.protobuf.gradle.proto
-import org.jetbrains.kotlin.gradle.plugin.extraProperties
 
 plugins {
     alias(libs.plugins.androidLibrary)

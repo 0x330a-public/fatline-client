@@ -1,6 +1,7 @@
 package online.mempool.fatline.api
 
 import com.squareup.anvil.annotations.ContributesBinding
+import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
 import okhttp3.HttpUrl
 import okhttp3.Interceptor
@@ -12,8 +13,9 @@ import retrofit2.OptionalConverterFactory
 import retrofit2.Response
 import retrofit2.Retrofit
 import retrofit2.converter.kotlinx.serialization.asConverterFactory
+import retrofit2.http.Body
 import retrofit2.http.GET
-import retrofit2.http.Header
+import retrofit2.http.POST
 import retrofit2.http.Path
 import java.util.concurrent.TimeUnit
 import javax.inject.Inject
@@ -36,7 +38,13 @@ interface ProfileClientService {
     @GET("/profile/{fid}/follows") suspend fun getFollows(@Path("fid") fid: Long): List<Profile>?
     /** Get a specific user's list of following aka people that user {fid} is FOLLOWING */
     @GET("/profile/{fid}/following") suspend fun getFollowing(@Path("fid") fid: Long): List<Profile>?
+    /** Post specific farcaster messages signed by a valid fid to the server, to be forwarded to the network */
+    @POST("/submit_messages") suspend fun postUpdates(@Body serializedUpdates: Messages): Response<Unit>
 }
+
+@ExperimentalUnsignedTypes
+@Serializable
+data class Messages(val updates: List<UByteArray>)
 
 const val SERVER_HTTP_URL = "Server_Named_HttpUrl"
 const val AUTH_INTERCEPTOR = "Auth_Interceptor"
@@ -73,4 +81,5 @@ class FatlineClient @Inject constructor(
     override suspend fun getProfile(fid: Long): Profile? = profileFactory.getProfile(fid)
     override suspend fun getFollows(fid: Long): List<Profile>? = profileFactory.getFollows(fid)
     override suspend fun getFollowing(fid: Long): List<Profile>? = profileFactory.getFollowing(fid)
+    override suspend fun postUpdates(serializedUpdates: Messages) = profileFactory.postUpdates(serializedUpdates)
 }
