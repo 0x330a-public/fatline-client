@@ -44,6 +44,9 @@ data class ProfileScreen(val fid: Long?): Screen {
     sealed interface Event: CircuitUiEvent {
         data class NavigateToProfile(val fid: Long? = null): Event
         data object EditProfile: Event
+        data object GoBack: Event
+        data class OpenFollowing(val fids: List<Long>): Event
+        data class OpenFollowers(val fids: List<Long>): Event
     }
     data class State(
         val isRoot: Boolean,
@@ -89,14 +92,21 @@ class ProfilePresenter @AssistedInject constructor(@Assisted private val navigat
         val followsState by followsFlow.collectAsRetainedState(initial = FollowLoadingState.Loading)
 
         return ProfileScreen.State(
-            isRoot = navigator.peekBackStack().first() == screen,
+            isRoot = navigator.peekBackStack().last() == screen,
             profileState = userState,
             followingState = followingState,
             followsState = followsState
         ) { event ->
             when (event) {
                 is ProfileScreen.Event.NavigateToProfile -> navigator.goTo(ProfileScreen(event.fid))
-                is ProfileScreen.Event.EditProfile -> navigator.goTo(EditProfileScreen)
+                ProfileScreen.Event.EditProfile -> navigator.goTo(EditProfileScreen)
+                is ProfileScreen.Event.OpenFollowers -> {
+                    navigator.goTo(UserListScreen(R.string.followers_title, event.fids))
+                }
+                is ProfileScreen.Event.OpenFollowing -> {
+                    navigator.goTo(UserListScreen(R.string.following_title, event.fids))
+                }
+                ProfileScreen.Event.GoBack -> navigator.pop()
             }
         }
 
@@ -116,17 +126,17 @@ fun Profile(state: ProfileScreen.State, modifier: Modifier = Modifier) {
 
     val showBack = !state.isRoot
 
-    val username = (state.profileState as? ProfileLoadingState.Loaded)?.userProfile?.username
+    val displayName = (state.profileState as? ProfileLoadingState.Loaded)?.userProfile?.display_name
         ?: stringResource(id = R.string.default_username)
 
     Scaffold(
         topBar = {
             TopAppBar(title = {
-                Text(username)
+                Text(displayName)
             }, navigationIcon = {
                 if (showBack) {
                     IconButton(onClick = {
-                        // clicked back
+                        state.eventSink(ProfileScreen.Event.GoBack)
                     }) {
                         Icon(Icons.AutoMirrored.Default.ArrowBack, contentDescription = null)
                     }

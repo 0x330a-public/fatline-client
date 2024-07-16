@@ -17,6 +17,7 @@ import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.launch
@@ -144,7 +145,7 @@ class UserRepository(
                     fatlineClient.getFollows(fetchFid).orEmpty()
                 }.getOrElse { emptyList() }
             }
-        }
+        }.onEach(::insertNewProfiles)
     }
 
     fun following(userFid: Long? , refreshes: Flow<Unit>) = runBlocking {
@@ -157,6 +158,14 @@ class UserRepository(
                 runCatching {
                     fatlineClient.getFollowing(fetchFid).orEmpty()
                 }.getOrElse { emptyList() }
+            }
+        }.onEach(::insertNewProfiles)
+    }
+
+    private suspend fun insertNewProfiles(profiles: List<Profile>) {
+        if (profiles.isNotEmpty()) {
+            withContext(context) {
+                profileDao.insert(*profiles.toTypedArray())
             }
         }
     }
@@ -188,6 +197,15 @@ class UserRepository(
             Log.d(TAG, "response was $response")
         }
     }
+
+    suspend fun getUsers(userFids: List<Long>): List<Profile> =
+        runCatching {
+            withContext(context) {
+                userFids.mapNotNull { fid ->
+                    profileDao.getUser(fid)
+                }
+            }
+        }.getOrElse { emptyList() }
 
 }
 

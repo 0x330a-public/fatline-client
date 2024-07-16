@@ -17,4 +17,6 @@
     <string name="url_field">URL</string>
     <string name="save_profile">Save Profile</string>
     <string name="fid_field">fid: %d</string>
+    <string name="followers_title">Followers</string>
+    <string name="following_title">Following</string>
 </resources>

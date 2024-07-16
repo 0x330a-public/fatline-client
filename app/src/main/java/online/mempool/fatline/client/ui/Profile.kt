@@ -36,10 +36,70 @@ import coil.request.ImageRequest
 import online.mempool.fatline.client.R
 import online.mempool.fatline.client.screens.FollowLoadingState
 import online.mempool.fatline.client.screens.ProfileLoadingState
-import online.mempool.fatline.client.screens.ProfileScreen
 import online.mempool.fatline.client.screens.ProfileScreen.Event
 import online.mempool.fatline.client.ui.theme.FatlineTheme
 import online.mempool.fatline.data.Profile
+
+@Composable
+fun ProfileAvatar(pfp: String?) {
+    val context = LocalContext.current
+    Box(
+        modifier = Modifier
+            .padding(16.dp)
+            .size(48.dp, 48.dp)
+            .clip(CircleShape)
+            .background(MaterialTheme.colorScheme.surfaceDim)
+            .border(1.dp, MaterialTheme.colorScheme.surface, shape = CircleShape)
+    ) {
+        val requestBuilder = ImageRequest.Builder(context)
+        if (!pfp.isNullOrEmpty()) {
+            AsyncImage(
+                model = requestBuilder
+                    .data(pfp)
+                    .crossfade(true)
+                    .build(),
+                contentDescription = null,
+                imageLoader = context.imageLoader,
+                modifier = Modifier.fillMaxSize()
+            )
+        } else {
+            Icon(
+                imageVector = Icons.Rounded.Person,
+                contentDescription = null,
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(8.dp)
+            )
+        }
+    }
+}
+
+@Composable
+fun ProfileListItem(profile: Profile, modifier: Modifier = Modifier) {
+    val displayName = profile.display_name ?: stringResource(R.string.default_username)
+    val pfp = profile.profile_picture
+
+    Row(modifier) {
+        ProfileAvatar(pfp = pfp)
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .align(Alignment.CenterVertically),
+            horizontalArrangement = Arrangement.Start,
+        ) {
+            Column(
+                modifier = Modifier
+                    .align(Alignment.CenterVertically)
+                    .weight(1f),
+                verticalArrangement = Arrangement.Center,
+            ) {
+                Text(displayName)
+                Text(profile.displayTag)
+            }
+        }
+    }
+
+}
 
 @Composable
 fun ProfileBanner(profileState: ProfileLoadingState,
@@ -48,11 +108,9 @@ fun ProfileBanner(profileState: ProfileLoadingState,
                   eventSink: (Event)->Unit,
                   modifier: Modifier = Modifier) {
 
-    val context = LocalContext.current
-
     val profile = (profileState as? ProfileLoadingState.Loaded)?.userProfile
 
-    val username = profile?.username ?: stringResource(R.string.default_username)
+    val displayName = profile?.display_name ?: stringResource(R.string.default_username)
 
 
     val pfp = profile?.profile_picture
@@ -60,35 +118,7 @@ fun ProfileBanner(profileState: ProfileLoadingState,
     Box(modifier = modifier.background(MaterialTheme.colorScheme.secondaryContainer)) {
         Column {
             Row {
-                Box(
-                    modifier = Modifier
-                        .padding(16.dp)
-                        .size(48.dp, 48.dp)
-                        .clip(CircleShape)
-                        .background(MaterialTheme.colorScheme.surfaceDim)
-                        .border(1.dp, MaterialTheme.colorScheme.surface, shape = CircleShape)
-                ) {
-                    val requestBuilder = ImageRequest.Builder(context)
-                    if (!pfp.isNullOrEmpty()) {
-                        AsyncImage(
-                            model = requestBuilder
-                                .data(pfp)
-                                .crossfade(true)
-                                .build(),
-                            contentDescription = null,
-                            imageLoader = context.imageLoader,
-                            modifier = Modifier.fillMaxSize()
-                        )
-                    } else {
-                        Icon(
-                            imageVector = Icons.Rounded.Person,
-                            contentDescription = null,
-                            modifier = Modifier
-                                .fillMaxSize()
-                                .padding(8.dp)
-                        )
-                    }
-                }
+                ProfileAvatar(pfp = pfp)
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
@@ -103,7 +133,7 @@ fun ProfileBanner(profileState: ProfileLoadingState,
                     ) {
                         when(profileState) {
                             is ProfileLoadingState.Loaded -> {
-                                Text(username)
+                                Text(displayName)
                                 Text(profileState.userProfile.displayTag)
                             }
                             is ProfileLoadingState.LoadError -> {
@@ -132,11 +162,16 @@ fun ProfileBanner(profileState: ProfileLoadingState,
                 val childModifier = Modifier.padding(8.dp)
                 ElevatedButton(
                     modifier = childModifier,
-                    onClick = { /*TODO*/ }) {
+                    onClick = {
+                        if (followingState is FollowLoadingState.Loaded) {
+                            eventSink(Event.OpenFollowing(followingState.profiles.map(Profile::fid)))
+                        }
+                    }) {
                     if (followingState is FollowLoadingState.Loading) {
                         CircularProgressIndicator(
-                            modifier = Modifier.size(16.dp)
-                                .padding(end=4.dp),
+                            modifier = Modifier
+                                .size(16.dp)
+                                .padding(end = 4.dp),
                             strokeWidth = 2.dp
                         )
                         Text(stringResource(id = R.string.following_placeholder))
@@ -147,11 +182,16 @@ fun ProfileBanner(profileState: ProfileLoadingState,
                 }
                 ElevatedButton(
                     modifier = childModifier,
-                    onClick = { /*TODO*/ }) {
+                    onClick = {
+                        if (followsState is FollowLoadingState.Loaded) {
+                            eventSink(Event.OpenFollowers(followsState.profiles.map(Profile::fid)))
+                        }
+                    }) {
                     if (followsState is FollowLoadingState.Loading) {
                         CircularProgressIndicator(
-                            modifier = Modifier.size(16.dp)
-                                .padding(end=4.dp),
+                            modifier = Modifier
+                                .size(16.dp)
+                                .padding(end = 4.dp),
                             strokeWidth = 2.dp
                         )
                         Text(stringResource(id = R.string.followers_placeholder))
@@ -178,6 +218,46 @@ fun ProfileBanner(profileState: ProfileLoadingState,
 
 }
 
+@Preview(showSystemUi = true)
+@Composable
+fun PreviewProfileList() {
+    val users = listOf(
+        Profile(
+            fid=1,
+            username="test-user1",
+            display_name = "Some User",
+            profile_picture = null,
+            bio = null,
+            url = null
+        ),
+        Profile(
+            fid=1,
+            username="user2",
+            display_name = "A New User",
+            profile_picture = null,
+            bio = null,
+            url = null
+        ),
+        Profile(
+            fid=1,
+            username="reallycoolguy123",
+            display_name = "third_user",
+            profile_picture = null,
+            bio = null,
+            url = null
+        )
+    )
+
+    FatlineTheme {
+        Box(Modifier.fillMaxSize()) {
+            Column {
+                users.map {
+                    ProfileListItem(profile = it)
+                }
+            }
+        }
+    }
+}
 
 @Preview(showSystemUi = true)
 @Composable
