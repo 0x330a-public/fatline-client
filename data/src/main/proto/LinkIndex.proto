@@ -1,0 +1,8 @@
+syntax = "proto3";
+
+option java_package = "online.mempool.fatline.proto";
+option java_multiple_files = true;
+
+message LinkIndex {
+  map<uint64,bool> fid_mapping = 1;
+}

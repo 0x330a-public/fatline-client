@@ -59,7 +59,7 @@ android {
         buildConfig = true
     }
     composeOptions {
-        kotlinCompilerExtensionVersion = "1.5.10"
+        kotlinCompilerExtensionVersion = "1.5.14"
     }
     packaging {
         resources {
@@ -88,6 +88,7 @@ dependencies {
     implementation(project(":data"))
     implementation(libs.androidx.security.crypto.ktx)
     implementation(libs.dagger.impl)
+    implementation(libs.datastore)
     kapt(libs.dagger.compiler)
     ksp(libs.room.compiler)
     implementation(libs.room.runtime)

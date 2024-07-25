@@ -1,0 +1,102 @@
+{
+  "formatVersion": 1,
+  "database": {
+    "version": 1,
+    "identityHash": "2bfcd270a977ddeb79ed7cc8169d36d1",
+    "entities": [
+      {
+        "tableName": "Profile",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`fid` INTEGER NOT NULL, `username` TEXT, `display_name` TEXT, `profile_picture` TEXT, `bio` TEXT, `url` TEXT, PRIMARY KEY(`fid`))",
+        "fields": [
+          {
+            "fieldPath": "fid",
+            "columnName": "fid",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "username",
+            "columnName": "username",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "display_name",
+            "columnName": "display_name",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "profile_picture",
+            "columnName": "profile_picture",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "bio",
+            "columnName": "bio",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "url",
+            "columnName": "url",
+            "affinity": "TEXT",
+            "notNull": false
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "fid"
+          ]
+        },
+        "indices": [],
+        "foreignKeys": []
+      },
+      {
+        "tableName": "IndexedSigner",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`keyIndex` INTEGER NOT NULL, `publicKey` BLOB NOT NULL, `forFid` INTEGER NOT NULL, `isActive` INTEGER NOT NULL, PRIMARY KEY(`keyIndex`))",
+        "fields": [
+          {
+            "fieldPath": "keyIndex",
+            "columnName": "keyIndex",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "publicKey",
+            "columnName": "publicKey",
+            "affinity": "BLOB",
+            "notNull": true
+          },
+          {
+            "fieldPath": "forFid",
+            "columnName": "forFid",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "isActive",
+            "columnName": "isActive",
+            "affinity": "INTEGER",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "keyIndex"
+          ]
+        },
+        "indices": [],
+        "foreignKeys": []
+      }
+    ],
+    "views": [],
+    "setupQueries": [
+      "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '2bfcd270a977ddeb79ed7cc8169d36d1')"
+    ]
+  }
+}

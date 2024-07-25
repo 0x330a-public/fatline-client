@@ -94,7 +94,7 @@ fun ProfileListItem(profile: Profile, modifier: Modifier = Modifier) {
                 verticalArrangement = Arrangement.Center,
             ) {
                 Text(displayName)
-                Text(profile.displayTag)
+                Text(profile.displayTag())
             }
         }
     }
@@ -134,7 +134,7 @@ fun ProfileBanner(profileState: ProfileLoadingState,
                         when(profileState) {
                             is ProfileLoadingState.Loaded -> {
                                 Text(displayName)
-                                Text(profileState.userProfile.displayTag)
+                                Text(profileState.userProfile.displayTag())
                             }
                             is ProfileLoadingState.LoadError -> {
 
@@ -228,7 +228,7 @@ fun PreviewProfileList() {
             display_name = "Some User",
             profile_picture = null,
             bio = null,
-            url = null
+            url = null,
         ),
         Profile(
             fid=1,
@@ -236,7 +236,7 @@ fun PreviewProfileList() {
             display_name = "A New User",
             profile_picture = null,
             bio = null,
-            url = null
+            url = null,
         ),
         Profile(
             fid=1,
@@ -244,7 +244,7 @@ fun PreviewProfileList() {
             display_name = "third_user",
             profile_picture = null,
             bio = null,
-            url = null
+            url = null,
         )
     )
 
@@ -272,7 +272,7 @@ fun PreviewProfile() {
                         display_name = "Test User",
                         profile_picture = null,
                         bio = null,
-                        url = null
+                        url = null,
                     ),
                     isUs = true
                 ),

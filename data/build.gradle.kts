@@ -9,6 +9,11 @@ plugins {
     alias(libs.plugins.serialization)
     alias(libs.plugins.ksp)
     alias(libs.plugins.protobuf)
+    alias(libs.plugins.room)
+}
+
+room {
+    schemaDirectory("$projectDir/schemas")
 }
 
 android {
@@ -70,6 +75,7 @@ dependencies {
     implementation(libs.kotlinx.serialization.core)
     implementation(libs.room.runtime)
     implementation(libs.room.ktx)
+    implementation(libs.datastore)
     api(libs.protobuf.kotlin)
     ksp(libs.room.compiler)
     kapt(libs.dagger.compiler)

@@ -44,6 +44,7 @@ dependencies {
     implementation(libs.kotlinx.serialization.core)
     implementation(libs.kotlinx.serialization.json)
     implementation(libs.dagger.impl)
+    implementation(libs.datastore)
     kapt(libs.dagger.compiler)
     implementation(project(":data"))
     testImplementation(libs.junit)

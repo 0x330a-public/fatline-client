@@ -24,4 +24,7 @@ class DaoModule(private val context: Context) {
     @Provides
     fun provideSignerStorage(appDatabase: AppDatabase) = appDatabase.signerDao()
 
+    @Provides
+    fun provideLinkIndexerDataStore() = context.linkIndexDataStore
+
 }

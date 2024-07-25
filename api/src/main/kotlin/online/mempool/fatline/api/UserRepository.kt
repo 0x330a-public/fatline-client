@@ -5,6 +5,7 @@ import MessageOuterClass.FarcasterNetwork.FARCASTER_NETWORK_MAINNET
 import MessageOuterClass.HashScheme.HASH_SCHEME_BLAKE3
 import MessageOuterClass.SignatureScheme.SIGNATURE_SCHEME_ED25519
 import android.util.Log
+import androidx.datastore.core.DataStore
 import com.google.protobuf.kotlin.toByteString
 import com.squareup.anvil.annotations.ContributesTo
 import dagger.Module
@@ -14,9 +15,9 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.channels.BufferOverflow
 import kotlinx.coroutines.channels.Channel
-import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.collectLatest
-import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.filter
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.flow.receiveAsFlow
@@ -26,6 +27,7 @@ import kotlinx.coroutines.withContext
 import message
 import messageData
 import okhttp3.Interceptor
+import online.mempool.fatline.data.FidAndTarget
 import online.mempool.fatline.data.Hash
 import online.mempool.fatline.data.IndexedSigner
 import online.mempool.fatline.data.Profile
@@ -36,8 +38,14 @@ import online.mempool.fatline.data.db.SignerDao
 import online.mempool.fatline.data.db.UserPreferencesRepository
 import online.mempool.fatline.data.di.AppScope
 import online.mempool.fatline.data.farcasterEpochNow
+import online.mempool.fatline.proto.LinkIndex
 import javax.inject.Named
 import javax.inject.Provider
+
+enum class FollowDirection {
+    FOLLOWING,
+    FOLLOWS
+}
 
 class UserRepository(
     private val signer: Signer,
@@ -45,6 +53,7 @@ class UserRepository(
     private val profileDao: ProfileDao,
     private val signerDao: SignerDao,
     private val userPrefsRepository: UserPreferencesRepository,
+    private val linkIndexStorage: DataStore<LinkIndex>
 ) {
 
     companion object {
@@ -76,8 +85,37 @@ class UserRepository(
     fun publicKeyFor(index: Long) = signer.publicKey(index.toUInt())
 
     private val updateChannel = Channel<Long>(capacity = 64, BufferOverflow.DROP_OLDEST)
+    private val followUpdateChannel = Channel<Pair<Long,FollowDirection>>(capacity = 2048, BufferOverflow.DROP_OLDEST)
 
     init {
+        scope.launch {
+            followUpdateChannel.receiveAsFlow().collect { (fid, direction) ->
+                runCatching {
+                    val newList = when (direction) {
+                        FollowDirection.FOLLOWS -> {
+                            fatlineClient.getFollows(fid)
+                        }
+                        FollowDirection.FOLLOWING -> {
+                            fatlineClient.getFollowing(fid)
+                        }
+                    } ?: return@runCatching
+                    profileDao.insert(*newList.toTypedArray())
+                    setIndexedFollows(fid)
+                    when (direction) {
+                        FollowDirection.FOLLOWS -> {
+                            profileDao.removeAndUpdateFollowers(fid, newList.map { p ->
+                                FidAndTarget(p.fid, fid)
+                            })
+                        }
+                        FollowDirection.FOLLOWING -> {
+                            profileDao.removeAndUpdateFollowing(fid, newList.map { p ->
+                                FidAndTarget(fid, p.fid)
+                            })
+                        }
+                    }
+                }
+            }
+        }
         scope.launch {
             updateChannel.receiveAsFlow().collectLatest { fid ->
                 runCatching {
@@ -134,32 +172,53 @@ class UserRepository(
             }
     }
 
-    fun follows(userFid: Long?, refreshes: Flow<Unit>) = runBlocking {
-        val fetchFid = withContext(context) {
-            userFid ?: currentFid()!!
-        }
-
-        refreshes.onStart { emit(Unit) }.map {
-            withContext(context) {
-                runCatching {
-                    fatlineClient.getFollows(fetchFid).orEmpty()
-                }.getOrElse { emptyList() }
-            }
-        }.onEach(::insertNewProfiles)
+    fun refreshFollowing(fid: Long) {
+        followUpdateChannel.trySend(fid to FollowDirection.FOLLOWING)
     }
 
-    fun following(userFid: Long? , refreshes: Flow<Unit>) = runBlocking {
+    fun refreshFollows(fid: Long) {
+        followUpdateChannel.trySend(fid to FollowDirection.FOLLOWS)
+    }
+
+    suspend fun setIndexedFollows(fid: Long) = withContext(context) {
+        linkIndexStorage.updateData { storage ->
+            storage.toBuilder()
+                .putFidMapping(fid, true)
+                .build()
+        }
+    }
+
+    suspend fun hasIndexedFollows(fid: Long) = withContext(context) {
+        linkIndexStorage.data.first().fidMappingMap[fid] == true
+    }
+
+    fun follows(userFid: Long?) = runBlocking {
         val fetchFid = withContext(context) {
             userFid ?: currentFid()!!
         }
 
-        refreshes.onStart { emit(Unit) }.map {
-            withContext(context) {
-                runCatching {
-                    fatlineClient.getFollowing(fetchFid).orEmpty()
-                }.getOrElse { emptyList() }
-            }
-        }.onEach(::insertNewProfiles)
+        profileDao.getFollowsFlow(fetchFid).onStart {
+            refreshFollows(fetchFid)
+        }.onEach { profiles ->
+            Log.d("follows", "New follows list ${profiles}")
+        }.filter {
+            // do a cheeky gate here until we have indexed follows
+            hasIndexedFollows(fetchFid)
+        }
+    }
+
+    fun following(userFid: Long?) = runBlocking {
+        val fetchFid = withContext(context) {
+            userFid ?: currentFid()!!
+        }
+
+        profileDao.getFollowingFlow(fetchFid).onStart {
+            refreshFollowing(fetchFid)
+        }.onEach { profiles ->
+            Log.d("following", "New following list ${profiles}")
+        }.filter {
+            hasIndexedFollows(fetchFid)
+        }
     }
 
     private suspend fun insertNewProfiles(profiles: List<Profile>) {
@@ -218,7 +277,8 @@ class UserRepoModule {
                               profileDao: ProfileDao,
                               signerDao: SignerDao,
                               userPrefs: UserPreferencesRepository,
-                              ) = UserRepository(signer, server, profileDao, signerDao, userPrefs)
+                              linkDataStore: DataStore<LinkIndex>
+                              ) = UserRepository(signer, server, profileDao, signerDao, userPrefs, linkDataStore)
 
     @Provides
     @Named(AUTH_INTERCEPTOR)

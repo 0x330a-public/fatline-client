@@ -40,10 +40,10 @@ import online.mempool.fatline.api.UserRepository
 import online.mempool.fatline.client.R
 import online.mempool.fatline.client.ui.theme.FatlineTheme
 import online.mempool.fatline.data.Profile
-import online.mempool.fatline.data.Profile.Companion.UpdatedField.BIO
-import online.mempool.fatline.data.Profile.Companion.UpdatedField.DISPLAY_NAME
-import online.mempool.fatline.data.Profile.Companion.UpdatedField.URL
-import online.mempool.fatline.data.Profile.Companion.profileUpdateBody
+import online.mempool.fatline.data.UpdatedField.BIO
+import online.mempool.fatline.data.UpdatedField.DISPLAY_NAME
+import online.mempool.fatline.data.UpdatedField.URL
+import online.mempool.fatline.data.profileUpdateBody
 import online.mempool.fatline.data.di.AppScope
 
 @Parcelize
@@ -232,7 +232,7 @@ fun PreviewEditProfile() {
                 display_name = "Test User",
                 profile_picture = null,
                 bio = null,
-                url = null
+                url = null,
             ),
             isUs = false,
         )

@@ -32,7 +32,6 @@ import dagger.assisted.AssistedFactory
 import dagger.assisted.AssistedInject
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.parcelize.Parcelize
 import online.mempool.fatline.api.UserRepository
 import online.mempool.fatline.client.R
@@ -65,10 +64,6 @@ class ProfilePresenter @AssistedInject constructor(@Assisted private val navigat
     @Composable
     override fun present(): ProfileScreen.State {
 
-        val refreshes = remember {
-            Channel<Unit>(Channel.CONFLATED)
-        }
-
         val userFlow = remember {
             userRepository.user(screen.fid).map { profile ->
                 ProfileLoadingState.Loaded(profile, profile.fid == userRepository.currentFid())
@@ -76,13 +71,13 @@ class ProfilePresenter @AssistedInject constructor(@Assisted private val navigat
         }
 
         val followsFlow = remember {
-            userRepository.follows(screen.fid, refreshes.receiveAsFlow()).map { follows ->
+            userRepository.follows(screen.fid).map { follows ->
                 FollowLoadingState.Loaded(follows)
             }
         }
 
         val followingFlow = remember {
-            userRepository.following(screen.fid, refreshes.receiveAsFlow()).map {
+            userRepository.following(screen.fid).map {
                 FollowLoadingState.Loaded(it)
             }
         }

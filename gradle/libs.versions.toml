@@ -1,14 +1,14 @@
 [versions]
 agp = "8.5.1"
 junitJupiter = "5.8.1"
-kotlin = "1.9.22"
+kotlin = "1.9.24"
 coreKtx = "1.13.1"
 junit = "4.13.2"
 junitVersion = "1.2.1"
 espressoCore = "3.6.1"
 kotlinxSerialization = "1.6.3"
-lifecycleRuntimeKtx = "2.8.3"
-activityCompose = "1.9.0"
+lifecycleRuntimeKtx = "2.8.4"
+activityCompose = "1.9.1"
 composeBom = "2024.06.00"
 anvil = "2.5.0-beta09"
 circuit = "0.22.2"
@@ -24,6 +24,7 @@ firebaseBom = "33.1.1"
 coil = "2.6.0"
 protobufGradle = "0.9.4"
 protobufKotlin = "4.27.2"
+datastore = "1.1.1"
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
@@ -62,7 +63,8 @@ room-testing= { group = "androidx.room", name = "room-testing", version.ref = "r
 fcm-bom = { group = "com.google.firebase", name = "firebase-bom", version.ref = "firebaseBom" }
 coil-bom = { group = "io.coil-kt", name="coil-bom", version.ref = "coil" }
 coil-compose = { group = "io.coil-kt", name="coil-compose" }
-protobuf-kotlin = {group = "com.google.protobuf", name="protobuf-kotlin-lite", version.ref="protobufKotlin"}
+protobuf-kotlin = { group = "com.google.protobuf", name="protobuf-kotlin-lite", version.ref="protobufKotlin" }
+datastore = { group = "androidx.datastore", name = "datastore", version.ref = "datastore" }
 
 [plugins]
 androidApplication = { id = "com.android.application", version.ref = "agp" }
@@ -71,8 +73,9 @@ jetbrainsKotlinJvm = { id = "org.jetbrains.kotlin.jvm", version.ref = "kotlin" }
 anvil = { id = "com.squareup.anvil", version.ref = "anvil" }
 androidLibrary = { id = "com.android.library", version.ref = "agp" }
 kapt = { id = "org.jetbrains.kotlin.kapt", version.ref = "kotlin" }
-ksp = { id = "com.google.devtools.ksp", version = "1.9.22-1.0.16" }
+ksp = { id = "com.google.devtools.ksp", version = "1.9.24-1.0.20" }
 serialization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "kotlin" }
 parcelize = { id = "org.jetbrains.kotlin.plugin.parcelize", version.ref = "kotlin" }
 googleServices = { id = "com.google.gms.google-services", version.ref = "gcmServices" }
 protobuf = { id = "com.google.protobuf", version.ref = "protobufGradle" }
+room = { id = "androidx.room", version.ref = "room" }
